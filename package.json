@@ -1,0 +1,22 @@
+{
+  "name": "slips",
+  "type": "module",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "Simple little IPS patching utility",
+  "keywords": ["ips", "rom", "patch"],
+  "author": "Bropedio",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bropedio/slips.git"
+  },
+  "bin": {
+    "slips": "./cli.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jshint": "x.x.x"
+  }
+}
+
+

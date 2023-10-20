@@ -1,0 +1,7 @@
+{
+  "esversion": 9,
+  "-W097": true,
+  "globals": {
+    "console": true
+  }
+}
