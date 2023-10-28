@@ -37,6 +37,18 @@ const actions = {
     ]);
     const ips = IPSPatch.from(original, modified);
     return fs.writeFile(output, Buffer.from(ips.toBuffer()));
+  },
+  parse: async (ips_path) => {
+    return fs.readFile(ips_path).then(ips => {
+      const patch = new IPSPatch(ips.buffer, ips.byteOffset, ips.byteLength);
+      console.log(JSON.stringify(patch.chunks.map(c => {
+        return {
+          start: c.start.toString(16),
+          end: c.end.toString(16),
+          rle: c.rle && c.rle.toString(16)
+        }; 
+      }), null, 4));
+    });
   }
 };
 
