@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+/* global console */
+
 import { promises as fs } from "node:fs";
 import { parseArgs } from "node:util";
-import { IPSPatch } from "./lib/ips_patch.js";
+import * as slips from "./main.js";
 
 const { positionals } = parseArgs({ allowPositionals: true });
 const [ action, ...args ] = positionals;
@@ -14,41 +16,29 @@ async function main () {
 
 const actions = {
   apply: async (input, output, ...ips_paths) => {
-    let target = await fs.readFile(input);
+    const target = await fs.readFile(input);
+    const applyPatch = slips.apply.bind(null, target);
 
     await Promise.all(ips_paths.map(path => {
-      return fs.readFile(path).then(ips => {
-        const ips_patch = new IPSPatch(
-          ips.buffer,
-          ips.byteOffset,
-          ips.byteLength
-        );
-
-        target = ips_patch.apply(target);
-      });
+      return fs.readFile(path).then(applyPatch);
     }));
 
     return fs.writeFile(output, target);
   },
+
   create: async (output, original_path, modified_path) => {
     const [original, modified] = await Promise.all([
       fs.readFile(original_path),
       fs.readFile(modified_path)
     ]);
-    const ips = IPSPatch.from(original, modified);
-    return fs.writeFile(output, Buffer.from(ips.toBuffer()));
+    const ips = slips.create(original, modified);
+    return fs.writeFile(output, ips);
   },
+
   parse: async (ips_path) => {
-    return fs.readFile(ips_path).then(ips => {
-      const patch = new IPSPatch(ips.buffer, ips.byteOffset, ips.byteLength);
-      console.log(JSON.stringify(patch.chunks.map(c => {
-        return {
-          start: c.start.toString(16),
-          end: c.end.toString(16),
-          rle: c.rle && c.rle.toString(16)
-        }; 
-      }), null, 4));
-    });
+    const ips = fs.readFile(ips_path);
+    const chunks = slips.parse(ips);
+    console.log(JSON.stringify(chunks, null, 4));
   }
 };
 
